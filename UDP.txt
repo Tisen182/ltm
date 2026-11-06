@@ -1,0 +1,219 @@
+import java.net.*;
+import java.util.ArrayList;
+import java.util.List;
+
+public class udpdiengiatri {
+    public static void main(String[] args) {
+        String serverHost = "36.50.135.242";
+        int serverPort = 2207;
+        String studentCode = "B23DCCN724";
+        String qCode = "DW45UbK6";
+
+        try (DatagramSocket socket = new DatagramSocket()) {
+            InetAddress address = InetAddress.getByName(serverHost);
+
+            // Bước 1: gửi chuỗi khởi tạo cho server
+            byte[] sendBuf = (";" + studentCode + ";" + qCode).getBytes();
+            socket.send(new DatagramPacket(sendBuf, sendBuf.length, address, serverPort));
+
+            // Bước 2: nhận chuỗi từ server
+            byte[] recvBuf = new byte[2048];
+            DatagramPacket recvPacket = new DatagramPacket(recvBuf, recvBuf.length);
+            socket.receive(recvPacket);
+
+            String received = new String(recvPacket.getData(), 0, recvPacket.getLength()).trim();
+            String[] parts = received.split(";", 3);
+
+            String requestId = parts[0];
+            int n = Integer.parseInt(parts[1]);
+            String[] numbers = parts[2].split(",");
+
+            // Bước 3: đánh dấu các số có mặt trong khoảng 1..n
+            boolean[] present = new boolean[n + 1];
+            for (String value : numbers) {
+                String clean = value.trim();
+                if (clean.isEmpty()) continue;
+                int num = Integer.parseInt(clean);
+                if (num >= 1 && num <= n) {
+                    present[num] = true;
+                }
+            }
+
+            // Bước 4: tìm các số bị thiếu
+            List<Integer> missing = new ArrayList<>();
+            for (int i = 1; i <= n; i++) {
+                if (!present[i]) {
+                    missing.add(i);
+                }
+            }
+
+            // Bước 5: gửi lại cho server theo dạng requestId;B1,B2,...,Bm
+            StringBuilder response = new StringBuilder();
+            response.append(requestId).append(";");
+            for (int i = 0; i < missing.size(); i++) {
+                if (i > 0) response.append(",");
+                response.append(missing.get(i));
+            }
+
+            byte[] outBuf = response.toString().getBytes();
+            socket.send(new DatagramPacket(outBuf, outBuf.length, address, serverPort));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+import java.net.*;
+
+public class udpmaxmin {
+    public static void main(String[] args) {
+        String serverHost = "36.50.135.242";
+        int serverPort = 2207;
+        String studentCode = "B23DCCN724";
+        String qCode = "ncnJtqbM";
+
+        try (DatagramSocket socket = new DatagramSocket()) {
+            InetAddress address = InetAddress.getByName(serverHost);
+
+            // Gửi gói khởi tạo
+            byte[] sendBuf = (";" + studentCode + ";" + qCode).getBytes();
+            socket.send(new DatagramPacket(sendBuf, sendBuf.length, address, serverPort));
+
+            // Nhận kết quả
+            byte[] recvBuf = new byte[2048];
+            DatagramPacket recvPacket = new DatagramPacket(recvBuf, recvBuf.length);
+            socket.receive(recvPacket);
+
+            String receivedStr = new String(recvPacket.getData(), 0, recvPacket.getLength()).trim();
+            String[] parts = receivedStr.split(";", 2);
+            String requestId = parts[0];
+            String[] numbers = parts[1].split(",");
+
+            int maxVal = Integer.MIN_VALUE;
+            int minVal = Integer.MAX_VALUE;
+
+            for (String numStr : numbers) {
+                int val = Integer.parseInt(numStr.trim());
+                if (val > maxVal) maxVal = val;
+                if (val < minVal) minVal = val;
+            }
+
+            // Gửi lại requestId;max,min
+            String resultStr = requestId + ";" + maxVal + "," + minVal;
+            byte[] outBuf = resultStr.getBytes();
+            socket.send(new DatagramPacket(outBuf, outBuf.length, address, serverPort));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+import java.net.*;
+
+public class udpstringchuanhoa {
+    public static void main(String[] args) {
+        String serverHost = "36.50.135.242";
+        int serverPort = 2208;
+        String studentCode = "B23DCCN724";
+        String qCode = "tqzbxOfH";
+
+        try (DatagramSocket socket = new DatagramSocket()) {
+            InetAddress address = InetAddress.getByName(serverHost);
+
+            // Gửi khởi tạo
+            byte[] sendBuf = (";" + studentCode + ";" + qCode).getBytes();
+            socket.send(new DatagramPacket(sendBuf, sendBuf.length, address, serverPort));
+
+            // Nhận dữ liệu
+            byte[] recvBuf = new byte[1024];
+            DatagramPacket recvPacket = new DatagramPacket(recvBuf, recvBuf.length);
+            socket.receive(recvPacket);
+
+            String receivedStr = new String(recvPacket.getData(), 0, recvPacket.getLength());
+            String[] parts = receivedStr.split(";", 2);
+            String requestId = parts[0];
+            String text = parts[1];
+
+            // Chuẩn hóa chuỗi
+            String[] words = text.trim().toLowerCase().split("\\s+");
+            StringBuilder formatted = new StringBuilder();
+            for (String w : words) {
+                if (!w.isEmpty()) {
+                    formatted.append(Character.toUpperCase(w.charAt(0)))
+                             .append(w.substring(1)).append(" ");
+                }
+            }
+
+            // Gửi lại: requestId;data
+            String response = requestId + ";" + formatted.toString().trim();
+            byte[] outBuf = response.getBytes();
+            socket.send(new DatagramPacket(outBuf, outBuf.length, address, serverPort));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+import java.net.*;
+import java.util.*;
+
+public class udpdemkytu {
+    public static void main(String[] args) {
+        String serverHost = "36.50.135.242";
+        int serverPort = 2208;
+        String studentCode = "B23DCCN724";
+        String qCode = "i4AV5ZSV";
+
+        try (DatagramSocket socket = new DatagramSocket()) {
+            InetAddress address = InetAddress.getByName(serverHost);
+
+            // Gửi gói khởi tạo
+            byte[] sendBuf = (";" + studentCode + ";" + qCode).getBytes();
+            socket.send(new DatagramPacket(sendBuf, sendBuf.length, address, serverPort));
+
+            // Nhận chuỗi từ server
+            byte[] recvBuf = new byte[2048];
+            DatagramPacket recvPacket = new DatagramPacket(recvBuf, recvBuf.length);
+            socket.receive(recvPacket);
+
+            String receivedStr = new String(recvPacket.getData(), 0, recvPacket.getLength());
+            String[] parts = receivedStr.split(";", 2);
+            String requestId = parts[0];
+            String data = parts[1];
+
+            // Đếm tần suất xuất hiện và lưu vị trí (1-based index)
+            Map<Character, List<Integer>> posMap = new LinkedHashMap<>();
+            for (int i = 0; i < data.length(); i++) {
+                char ch = data.charAt(i);
+                posMap.computeIfAbsent(ch, k -> new ArrayList<>()).add(i + 1);
+            }
+
+            // Tìm ký tự có số lần xuất hiện lớn nhất
+            char bestChar = ' ';
+            int maxCount = 0;
+            for (Map.Entry<Character, List<Integer>> entry : posMap.entrySet()) {
+                if (entry.getValue().size() > maxCount) {
+                    maxCount = entry.getValue().size();
+                    bestChar = entry.getKey();
+                }
+            }
+
+            // Tạo chuỗi danh sách vị trí: ví dụ "4,9,"
+            StringBuilder positions = new StringBuilder();
+            for (int pos : posMap.get(bestChar)) {
+                positions.append(pos).append(",");
+            }
+
+            // Gửi lại: requestId;ký_tự:vị_trí
+            String response = requestId + ";" + bestChar + ":" + positions.toString();
+            byte[] outBuf = response.getBytes();
+            socket.send(new DatagramPacket(outBuf, outBuf.length, address, serverPort));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
